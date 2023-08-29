@@ -93,6 +93,24 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 	}
 }
 
+void	ft_lstclear(t_list **lst)
+{
+	t_list	*current;
+	t_list	*aux;
+
+	if (lst == NULL)
+		return ;
+	current = *lst;
+	while (current != NULL)
+	{
+		aux = current->next;
+		free(current->str);
+		free(current);
+		current = aux;
+	}
+	*lst = NULL;
+}
+
 int get_line_length(t_list *next_line)
 {
 	int i;
@@ -134,7 +152,7 @@ char *get_line(t_list *next_line)
 	{
 		i = 0;
 		while(cursor->str[i] != '\n' && cursor->str[i] != '\0')
-			line[j++] = cursor->str[i--];
+			line[j++] = cursor->str[i++];
 		if(cursor->str[i] == '\n')
 			line[j] = '\n';
 		cursor = cursor->next;
@@ -149,29 +167,32 @@ void update_next_line(t_list **ptr)
 	t_list *new_node;
 	char *rest_line;
 	int rest_len;
+	int i;
+	int start;
 
 	last = ft_lstlast(*ptr);
 
+	i = 0;
 	while(last->str[i] != '\n' && last->str[i] != '\0')
-		last[i++];
-	if(last->str[i] == '\0')
-	{
-
-	}
+		i++;
 	i++;
+	start = i;
 	rest_len = 0;
 	while(last->str[i] != '\0')
 	{
-	}	rest_len++;
-		
-	rest_line = malloc(rest_len);
-	while(last->str[i] != '\0')
-
+		rest_len++;
+		i++;
+	}
+	rest_line = ft_calloc((rest_len + 1), 1);
+	i = 0;
+	while(last->str[start] != '\0')
+		rest_line[i++] = last->str[start++];
 	new_node = ft_lstnew(rest_line);
-
+	ft_lstclear(ptr);
+	*ptr = new_node;
 }
 
-void get_next_line(fd)
+char *get_next_line(fd)
 {
     char *buffer;
     char *line;
@@ -187,16 +208,16 @@ void get_next_line(fd)
 
         buffer[bytes_read] = '\0';
         
-        new_buff_node = ft_lstnew(buffer);
-        
-        if(next_line == NULL)
-            next_line = ft_lstnew(buffer);
+		if(new_buff_node == NULL)
+        	new_buff_node = ft_lstnew(buffer);
         else
             ft_lstadd_back(&next_line, new_buff_node);
     }
 
     line = get_line(next_line);
-	update_next_line(&next_line);    
+	update_next_line(&next_line);   
+
+	return (line);
 }
 
 #include <stdio.h>
@@ -213,11 +234,11 @@ int main(void)
 
     get_next_line(fd);
 
-    // while(i < 8)
-    // {
-    //     res = get_next_line(fd);
-    //     printf("%d: %s", i, res);
-    //     free(res);
-    //     i++;
-    // }
+    while(i < 2)
+    {
+        res = get_next_line(fd);
+        printf("%d: %s", i, res);
+        free(res);
+        i++;
+    }
 }
