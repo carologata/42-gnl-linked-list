@@ -61,13 +61,13 @@ void	update_next_line(t_list **ptr)
 	int		i;
 	int		start;
 
-	last = ft_lstlast(&ptr[0][0]);
+	// last = ft_lstlast(&ptr[0][0]);
+	last = ft_lstlast(*ptr);
 	i = 0;
 	while (last->str[i] != '\n' && last->str[i] != '\0')
 		i++;
 	if (last->str[i] == '\0')
 	{
-		
 		ft_lstclear(ptr);
 		*ptr = NULL;
 		return ;
@@ -128,6 +128,8 @@ char	*get_next_line(int fd)
 	new_buff_node = NULL;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
+	
+		
 	while (!ft_find_newline(next_line) && bytes_read > 0)
 	{
 		buffer = ft_calloc(BUFFER_SIZE, 1);
