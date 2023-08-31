@@ -33,7 +33,7 @@ char	*separate_line(t_list *cursor)
 	if (line == NULL)
 		return (NULL);
 	j = 0;
-	while (cursor != NULL)  
+	while (cursor != NULL)
 	{
 		i = 0;
 		while (cursor->str[i] != '\n' && cursor->str[i] != '\0')
@@ -77,10 +77,7 @@ void	update_next_line(t_list **ptr)
 	start = i;
 	rest_len = 0;
 	while (last->str[i] != '\0')
-	{
-		rest_len++;
-		i++;
-	}
+		rest_len = i++;
 	rest_line = ft_calloc((rest_len + 1), 1);
 	i = 0;
 	while (last->str[start] != '\0')
@@ -111,43 +108,52 @@ int	ft_find_newline(t_list *next_line)
 	return (0);
 }
 
+void	read_and_check_newline(int fd, t_list **ptr_next_line,
+		char **ptr_buffer, int bytes_read)
+{
+	t_list	*new_buff_node;
+
+	new_buff_node = NULL;
+	while (!ft_find_newline(*ptr_next_line) && bytes_read > 0)
+	{
+		*ptr_buffer = ft_calloc((BUFFER_SIZE + 1), 1);
+		bytes_read = read(fd, *ptr_buffer, BUFFER_SIZE);
+		if ((!*ptr_next_line && !*ptr_buffer[0] && !bytes_read)
+			|| bytes_read < 0)
+		{
+			free(*ptr_buffer);
+			*ptr_next_line = NULL;
+			break ;
+		}
+		if (bytes_read == 0)
+		{
+			free(*ptr_buffer);
+			break ;
+		}
+		if (*ptr_next_line == NULL)
+			*ptr_next_line = ft_lstnew(*ptr_buffer);
+		else
+		{
+			new_buff_node = ft_lstnew(*ptr_buffer);
+			ft_lstadd_back(ptr_next_line, new_buff_node);
+			new_buff_node = NULL;
+		}
+	}
+}
+
 char	*get_next_line(int fd)
 {
 	char			*buffer;
 	char			*line;
 	static t_list	*next_line;
-	t_list			*new_buff_node;
 	int				bytes_read;
 
 	bytes_read = 1;
-	new_buff_node = NULL;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	while (!ft_find_newline(next_line) && bytes_read > 0)
-	{
-		buffer = ft_calloc((BUFFER_SIZE + 1), 1);
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if ((!next_line && !*buffer && !bytes_read) || bytes_read < 0)
-		{
-			free(buffer);
-			next_line = NULL;
-			return (NULL);
-		}
-		if (bytes_read == 0)
-		{
-			free(buffer);
-			break ;
-		}
-		buffer[bytes_read] = '\0';
-		if (next_line == NULL)
-			next_line = ft_lstnew(buffer);
-		else
-		{
-			new_buff_node = ft_lstnew(buffer);
-			ft_lstadd_back(&next_line, new_buff_node);
-			new_buff_node = NULL;
-		}
-	}
+	read_and_check_newline(fd, &next_line, &buffer, bytes_read);
+	if(next_line == NULL)
+		return (NULL);
 	line = separate_line(next_line);
 	update_next_line(&next_line);
 	return (line);
