@@ -122,6 +122,7 @@ void	read_and_check_newline(int fd, t_list **ptr_next_line,
 			|| bytes_read < 0)
 		{
 			free(*ptr_buffer);
+			ft_lstclear(ptr_next_line);
 			*ptr_next_line = NULL;
 			break ;
 		}
@@ -158,8 +159,8 @@ char	*get_next_line(int fd)
 	update_next_line(&next_line);
 	return (line);
 }
-
-/* #include <fcntl.h>
+/* 
+#include <fcntl.h>
 #include <stdio.h>
 
 int	main(void)
@@ -169,8 +170,8 @@ int	main(void)
 	char *res;
 
 	i = 0;
-
-	fd = open("teste.txt", O_RDWR);
+	fd = open("teste.txt", O_RDONLY);
+	// fd = -1;
 	//1
 	res = get_next_line(fd);
 	printf("1: %s", res);
@@ -181,7 +182,7 @@ int	main(void)
 	free(res);
 
 	close(fd);
-	fd = open("teste.txt", O_RDWR);
+	// fd = open("teste.txt", O_WRONLY);
 	//1
 	res = get_next_line(fd);
 	printf("1: %s", res);
