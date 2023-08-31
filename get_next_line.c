@@ -1,12 +1,10 @@
 #include "get_next_line.h"
 
-int	get_line_length(t_list *next_line)
+int	get_line_length(t_list *cursor)
 {
-	int		i;
-	int		count;
-	t_list	*cursor;
+	int	i;
+	int	count;
 
-	cursor = next_line;
 	count = 0;
 	while (cursor != NULL)
 	{
@@ -23,21 +21,19 @@ int	get_line_length(t_list *next_line)
 	return (count);
 }
 
-char	*get_line(t_list *next_line)
+char	*separate_line(t_list *cursor)
 {
-	t_list	*cursor;
 	char	*line;
 	int		line_length;
 	int		i;
 	int		j;
 
-	cursor = next_line;
-	line_length = get_line_length(next_line);
+	line_length = get_line_length(cursor);
 	line = ft_calloc((line_length + 2), 1);
 	if (line == NULL)
 		return (NULL);
 	j = 0;
-	while (cursor != NULL)
+	while (cursor != NULL)  
 	{
 		i = 0;
 		while (cursor->str[i] != '\n' && cursor->str[i] != '\0')
@@ -61,7 +57,6 @@ void	update_next_line(t_list **ptr)
 	int		i;
 	int		start;
 
-	// last = ft_lstlast(&ptr[0][0]);
 	last = ft_lstlast(*ptr);
 	i = 0;
 	while (last->str[i] != '\n' && last->str[i] != '\0')
@@ -128,19 +123,21 @@ char	*get_next_line(int fd)
 	new_buff_node = NULL;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	
-		
 	while (!ft_find_newline(next_line) && bytes_read > 0)
 	{
-		buffer = ft_calloc(BUFFER_SIZE, 1);
+		buffer = ft_calloc((BUFFER_SIZE + 1), 1);
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if ((!next_line && !*buffer && !bytes_read) || bytes_read < 0)
 		{
 			free(buffer);
+			next_line = NULL;
 			return (NULL);
 		}
 		if (bytes_read == 0)
+		{
+			free(buffer);
 			break ;
+		}
 		buffer[bytes_read] = '\0';
 		if (next_line == NULL)
 			next_line = ft_lstnew(buffer);
@@ -151,12 +148,12 @@ char	*get_next_line(int fd)
 			new_buff_node = NULL;
 		}
 	}
-	line = get_line(next_line);
+	line = separate_line(next_line);
 	update_next_line(&next_line);
 	return (line);
 }
 
-#include <fcntl.h>
+/* #include <fcntl.h>
 #include <stdio.h>
 
 int	main(void)
@@ -168,12 +165,39 @@ int	main(void)
 	i = 0;
 
 	fd = open("teste.txt", O_RDWR);
+	//1
+	res = get_next_line(fd);
+	printf("1: %s", res);
+	free(res);
+	//2
+	res = get_next_line(fd);
+	printf("1: %s", res);
+	free(res);
 
-	while (i < 8)
-	{
-		res = get_next_line(fd);
-		printf("%d: %s", i, res);
-		free(res);
-		i++;
-	}
-}
+	close(fd);
+	fd = open("teste.txt", O_RDWR);
+	//1
+	res = get_next_line(fd);
+	printf("1: %s", res);
+	free(res);
+	//2
+	res = get_next_line(fd);
+	printf("2: %s", res);
+	free(res);
+	//3
+	res = get_next_line(fd);
+	printf("3: %s", res);
+	free(res);
+	//4
+	res = get_next_line(fd);
+	printf("4: %s", res);
+	free(res);
+	//5
+	res = get_next_line(fd);
+	printf("5: %s", res);
+	free(res);
+	//6
+	res = get_next_line(fd);
+	printf("6: %s", res);
+	free(res);
+} */
